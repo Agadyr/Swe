@@ -6,7 +6,6 @@ class Config:
     # SQLALCHEMY_DATABASE_URI = 'sqlite:///patients.db' previous sqlite 
     # SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://root:2K1AEpi8UFGIkI0c2KGR3Vl8kM7oUvXl2TWyzi1TY1Q=@mysql-5-l287:3306/mysql'
-
     SMTP2GO_API_KEY = 'api-8B5895FA7DB14690B762617532289AA5'  # Replace with your actual SMTP2GO API key
     SMTP2GO_SENDER = '200107052@stu.sdu.edu.kz'  # Replace with your verified sender email
     UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
