@@ -1,0 +1,107 @@
+[Unit]
+Description=Gunicorn daemon for Flask app
+After=network.target
+
+[Service]
+User=gunicorn
+Group=gunicorn
+WorkingDirectory=/root/flask_project/venv/backendSWE
+Environment="PATH=/srv/backendSWE/venv/bin"
+ExecStart=/root/flask_project/venv/bin/gunicorn --workers 4 --bind unix:/root/flask_project/venv/backendSWE/gunicorn.sock wsgi:app
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+
+[Unit]
+Description=Gunicorn daemon for Flask app
+After=network.target
+
+[Service]
+User=gunicorn
+Group=gunicorn
+WorkingDirectory=/srv/backendSWE
+Environment="PATH=/srv/backendSWE/venv/bin"
+ExecStart=/usr/local/bin/gunicorn --workers 4 --bind unix:/srv/backendSWE/gunicorn.sock wsgi:app
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+
+curl --unix-socket /srv/backendSWE/gunicorn.sock http://localhost:5000/patients
+
+
+
+
+
+  GNU nano 4.8                                            wsgi.py                                                      
+from app import create_app
+
+app = create_app()
+
+if __name__ == "__main__":
+    app.run()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def get_medhistory(email):
+    try:
+        patient = Patient.query.filter_by(email=email).first()
+        if not patient:
+            return {'error': 'Patient not found'}, 404
+
+        # Fetch all MedHistory entries for the patient's appointments
+        medhistory_entries = MedHistory.query.join(Appointment).filter(
+            Appointment.patient_id == patient.patient_id
+        ).all()
+
+        medical_history = []
+        for entry in medhistory_entries:
+            appointment_date = (
+                entry.appointment_date.strftime('%Y-%m-%d')
+                if entry.appointment_date
+                else None
+            )
+            doctor = entry.appointment.doctor if entry.appointment else None
+            doctor_name = (
+                f"{doctor.first_name} {doctor.last_name}"
+                if doctor
+                else None
+            )
+            specialization = (
+                doctor.specialization.spec_name
+                if doctor and doctor.specialization
+                else None
+            )
+
+            medical_history.append({
+                'appointment_id': entry.appointment_id,
+                'diagnosis': entry.diagnosis,
+                'feedback': entry.feedback,
+                'appointment_date': appointment_date,
+                'appointment_type': entry.appointment_type,
+                'doctor_name': doctor_name,
+                'specialization': specialization
+            })
+
+        return {'medical_history': medical_history}, 200
+    except Exception as e:
+        return {'error': str(e)}, 400
